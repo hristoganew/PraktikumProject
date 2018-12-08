@@ -52,8 +52,19 @@
     });
 
     function fetchPlayers() {
-        $.get('http://localhost:3000/players', function(data){
-            console.log(data);
+        $.ajax({
+            url: 'http://localhost:3000/players',
+            crossOrigin: true,
+            crossDomain: true,
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                alert("Success");
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                alert('error ' + textStatus + " " + errorThrown);
+            }
         });
     }
 </script>
