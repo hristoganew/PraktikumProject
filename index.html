@@ -39,8 +39,26 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                <div class="players-container"></div>
-                <input type="button" class="btn btn-success" value="Get All Players" id="getPlayersButton">
+                <div id="players-container" class="row"></div>
+                <input type="button" class="btn btn-success" value="Show All Players in Grid" id="showGrid">
+                <button id="showList" class="btn btn-success">Show All Players in List</button>
+                
+            </div>
+
+            <div class="container">
+                <div class="row">
+                    <div class="col">
+                        <h3>Add Player</h3>
+                        <form id="formData" action="http://localhost:3000/player" method="POST">
+                            <input type="text" id="firstName" name="first_name">
+                            <input type="text" id="lastName" name="last_name">
+                            <input type="text" id="team" name="team">
+
+                        </form>
+
+                        <button id="submitForm" class="btn btn-success">Add</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -48,16 +66,49 @@
 
 <script>
     $(document).ready(function () {
-        $('#getPlayersButton').on('click', fetchPlayers);
+        $('#showGrid').on('click', showGrid);
+        $('#submitForm').on("click", addPlayer);
+        $('#showList').on("click", showList);
+        
     });
 
-    function fetchPlayers() {
+    function showList(){
+        fetchPlayers('list');
+    }
+
+    function showGrid(){
+        fetchPlayers('grid');
+    }
+
+    function fetchPlayers(view) {
         $.ajax({
             url: 'http://localhost:3000/players',
             crossOrigin: true,
             crossDomain: true,
             type: 'GET',
             dataType: 'json',
+            success: function (data) {
+                generateGrid(data, view)
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                alert('error ' + textStatus + " " + errorThrown);
+            }
+        });
+    }
+
+    function addPlayer(){
+        
+        $.ajax({
+            url: 'http://localhost:3000/player',
+            crossOrigin: true,
+            crossDomain: true,
+            type: 'POST',
+            dataType: 'text',
+            data:{
+                firstName: $('#firstName').val(),
+                lastName: $('#lastName').val(),
+                team: $('#team').val()
+            },
             success: function (data) {
                 console.log(data);
                 alert("Success");
@@ -66,6 +117,50 @@
                 alert('error ' + textStatus + " " + errorThrown);
             }
         });
+    }
+
+    function generateGrid(players, viewType = 'grid'){
+        
+        console.log(viewType);
+        let output = '';
+        if(viewType == 'grid'){
+            $('#players-container').addClass('row');
+        }
+
+        if(viewType == 'list'){
+            $('#players-container').removeClass('row');
+        }
+
+        $.each(players, (index, player) => {
+            if(viewType == 'list'){
+                output += `
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="well text-center">
+                                <h3>${player.first_name} ${player.last_name}</h3>
+                                <h5>${player.team}</h5>
+                            </div>
+                        </div>
+                    </div>
+               `;
+            }
+
+
+            if(viewType == 'grid'){
+                console.log('test');
+                output += `
+                    <div class="col-md-3">
+                        <div class="well text-center">
+                            <h3>${player.first_name} ${player.last_name}</h3>
+                            <h5>${player.team}</h5>
+                        </div>
+                    </div>
+               `;
+            }
+
+            $('#players-container').html(output);
+        });
+        
     }
 </script>
 
